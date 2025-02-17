@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tormenta Eléctrica Realista</title>
+    <style>
+        html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at bottom, #4a4a7d, #1e1e3f, #0a0a0a);
+}
+
+        /* Nubes animadas */
+        .cloud {
+            position: absolute;
+            width: 250px;
+            height: 90px;
+            background: #666;
+            opacity: 0.85;
+            border-radius: 50%;
+            filter: blur(5px);
+            animation: moveClouds 20s linear infinite alternate;
+        }
+
+        .cloud::before, .cloud::after {
+            content: "";
+            position: absolute;
+            background: #666;
+            border-radius: 50%;
+            filter: blur(5px);
+        }
+
+        .cloud::before {
+            width: 130px;
+            height: 70px;
+            top: -30px;
+            left: 20px;
+        }
+
+        .cloud::after {
+            width: 160px;
+            height: 80px;
+            top: -20px;
+            right: 30px;
+        }
+
+        @keyframes moveClouds {
+            from { transform: translateX(-5vw); }
+            to { transform: translateX(5vw); }
+        }
+
+        /* Fondo montañoso */
+        .mountains {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40vh;
+            background: linear-gradient(to top, #1a1a1a, #333);
+            clip-path: polygon(0% 100%, 10% 75%, 25% 90%, 40% 65%, 55% 85%, 70% 60%, 85% 78%, 100% 100%);
+        }
+
+         /* Árboles pequeños */
+        .trees {
+            position: absolute;
+            bottom: 5%;
+            width: 100%;
+            display: flex;
+            justify-content: space-evenly;
+        }
+
+        .tree {
+            width: 6px;
+            height: 20px;
+            background: brown;
+            position: relative;
+        }
+
+        .tree::before {
+            content: "";
+            position: absolute;
+            bottom: 12px;
+            left: -10px;
+            width: 26px;
+            height: 26px;
+            background: green;
+            clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+        }
+
+        .trunk {
+            width: 10px;
+            height: 30px;
+            background: #4b2e1e;
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+        }
+
+        .foliage {
+            width: 40px;
+            height: 40px;
+            background: darkgreen;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Efecto de lluvia */
+        .rain {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            pointer-events: none;
+        }
+
+        .drop {
+            position: absolute;
+            width: 2px;
+            height: 15px;
+            background: rgba(173, 216, 230, 0.7);
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            from { transform: translateY(-10vh); }
+            to { transform: translateY(100vh); }
+        }
+
+        /* Flash de relámpago */
+        .lightning-flash {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            background: white;
+            opacity: 0;
+            transition: opacity 0.1s ease-out;
+        }
+
+        /* Relámpagos */
+        .lightning-bolt {
+            position: absolute;
+            stroke: yellow;
+            stroke-width: 4;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0px 0px 10px yellow);
+            opacity: 0;
+            transition: opacity 0.1s ease-out;
+        }
+
+        /* Contenedor de rayos */
+        .lightning-container {
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            pointer-events: none;
+        }
+
+        /* Rayos con zigzag realista */
+        .bolt {
+            position: absolute;
+            width: 5px;
+            background: yellow;
+            box-shadow: 0 0 15px yellow;
+            opacity: 1;
+            animation: boltFade 0.3s ease-out;
+        }
+
+        @keyframes boltFade {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+.flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s
+    </style>
+</head>
+<body>
+
+    <div class="rain" id="rain"></div>
+    <div class="lightning" id="lightning"></div>
+    <div class="lightning-container" id="lightning-container"></div>
+    <div class="storm-clouds" id="storm-clouds"></div>
+    <div class="mountains"></div>
+    <div class="trees" id="trees"></div>
+    <div class="flash" id="flash"></div>
+
+    <script>
+        function createClouds() {
+            for (let i = 0; i < 5; i++) {
+                let cloud = document.createElement("div");
+                cloud.classList.add("cloud");
+                cloud.style.left = Math.random() * 80 + "vw";
+                cloud.style.top = Math.random() * 15 + "vh";
+                document.body.appendChild(cloud);
+            }
+
+            for (let i = 0; i < 4; i++) {
+                let cloud = document.createElement("div");
+                cloud.classList.add("cloud");
+                cloud.style.left = Math.random() * 80 + "vw";
+                cloud.style.top = Math.random() * 25 + 15 + "vh";
+                document.getElementById("storm-clouds").appendChild(cloud);
+            }
+        }
+
+        function createRain() {
+            const rainContainer = document.getElementById("rain");
+            rainContainer.innerHTML = ""; 
+
+            for (let i = 0; i < 200; i++) {
+                let drop = document.createElement("div");
+                drop.classList.add("drop");
+                drop.style.left = Math.random() * 100 + "vw";
+                drop.style.animationDuration = (Math.random() * 0.5 + 0.5) + "s";
+                rainContainer.appendChild(drop);
+            }
+        }
+
+        function flashLightning() {
+    const lightning = document.getElementById("lightning");
+    const flash = document.getElementById("flash");
+
+    setTimeout(() => {
+        flash.style.opacity = 1;  // Activa el flash
+        setTimeout(() => { flash.style.opacity = 0; }, 100); // Se apaga rápido
+        createLightningBolt();
+        flashLightning();
+    }, Math.random() * 5000 + 2000);
+}
+
+        function createLightningBolt() {
+            const container = document.getElementById("lightning-container");
+            const clouds = document.querySelectorAll(".cloud");
+            
+            if (clouds.length === 0) return;
+
+            let randomCloud = clouds[Math.floor(Math.random() * clouds.length)];
+            let cloudRect = randomCloud.getBoundingClientRect();
+            let x = Math.random() * cloudRect.width + cloudRect.left;
+            let y = cloudRect.bottom;
+
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", window.innerWidth);
+            svg.setAttribute("height", window.innerHeight);
+            svg.style.position = "absolute";
+            svg.style.top = "0";
+            svg.style.left = "0";
+
+            const bolt = document.createElementNS(svgNS, "polyline");
+            bolt.setAttribute("stroke", "yellow");
+            bolt.setAttribute("stroke-width", "4");
+            bolt.setAttribute("fill", "none");
+            bolt.style.filter = "drop-shadow(0px 0px 10px yellow)";
+
+            let points = [];
+            for (let i = 0; i < 6; i++) {
+                x += Math.random() * 40 - 20;
+                y += window.innerHeight / 6;
+                points.push(`${x},${y}`);
+            }
+
+            bolt.setAttribute("points", points.join(" "));
+            svg.appendChild(bolt);
+            container.appendChild(svg);
+
+            setTimeout(() => {
+                svg.remove();
+            }, 300);
+        }
+
+        function createTrees() {
+            const treesContainer = document.getElementById("trees");
+
+            for (let i = 0; i < 25; i++) {
+                let tree = document.createElement("div");
+                tree.classList.add("tree");
+                tree.innerHTML = '<div class="trunk"></div><div class="foliage"></div>';
+                tree.style.left = Math.random() * 100 + "vw";
+                treesContainer.appendChild(tree);
+            }
+        }
+
+        createClouds();
+        createRain();
+        createTrees();
+        flashLightning();
+    </script>
+
+</body>
+</html>
